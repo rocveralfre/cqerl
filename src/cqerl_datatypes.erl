@@ -259,19 +259,19 @@ encode_data({_Type, null}, _Query) ->
 
 encode_data({timeuuid, now}, _Query) ->
     State = case get(timeuuid_state) of
-        undefined -> uuid:new(self(), os);
+        undefined -> uuid_erl:new(self(), os);
         State1 -> State1
     end,
-    {UUID, NewState} = uuid:get_v1(State),
+    {UUID, NewState} = uuid_erl:get_v1(State),
     put(timeuuid_state, NewState),
     UUID;
 
 encode_data({uuid, new}, _Query) ->
-    uuid:get_v4(strong);
+    uuid_erl:get_v4(strong);
 encode_data({uuid, strong}, _Query) ->
-    uuid:get_v4(strong);
+    uuid_erl:get_v4(strong);
 encode_data({uuid, weak}, _Query) ->
-    uuid:get_v4(weak);
+    uuid_erl:get_v4(weak);
 
 encode_data({UuidType, Uuid}, _Query) when UuidType == uuid orelse UuidType == timeuuid ->
     case Uuid of
@@ -279,7 +279,7 @@ encode_data({UuidType, Uuid}, _Query) when UuidType == uuid orelse UuidType == t
             Uuid;
         UuidList when is_list(UuidList) andalso length(UuidList) == 36;
                       is_binary(UuidList) andalso size(UuidList) == 36 ->
-            uuid:string_to_uuid(UuidList);
+            uuid_erl:string_to_uuid(UuidList);
         _ ->
             throw({bad_param_type, UuidType, Uuid})
     end;
@@ -491,7 +491,7 @@ decode_data({UuidType, 16, Bin}, Opts) when UuidType == uuid orelse UuidType == 
     << Uuid:16/binary, Rest/binary >> = Bin,
     case proplists:get_bool(text_uuids, Opts) of
         true ->
-            {uuid:uuid_to_string(Uuid, binary_standard), Rest};
+            {uuid_erl:uuid_to_string(Uuid, binary_standard), Rest};
         false ->
             {Uuid, Rest}
     end;
